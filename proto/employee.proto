@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package employee;
+
+// The Employee entity itself
+message Employee {
+  int32 id = 1;
+  string name = 2;
+  string department = 3;
+  double salary = 4;
+}
+
+// --- Create ---
+message CreateEmployeeRequest {
+  string name = 1;
+  string department = 2;
+  double salary = 3;
+  // no id here - the server assigns it
+}
+
+message CreateEmployeeResponse {
+  Employee employee = 1;
+}
+
+// --- Read ---
+message GetEmployeeRequest {
+  int32 id = 1;
+}
+
+message GetEmployeeResponse {
+  Employee employee = 1;
+}
+
+// --- Update ---
+message UpdateEmployeeRequest {
+  int32 id = 1;
+  string name = 2;
+  string department = 3;
+  double salary = 4;
+}
+
+message UpdateEmployeeResponse {
+  Employee employee = 1;
+}
+
+// --- Delete ---
+message DeleteEmployeeRequest {
+  int32 id = 1;
+}
+
+message DeleteEmployeeResponse {
+  bool success = 1;
+}
+
+// --- The Service ---
+service EmployeeService {
+  rpc CreateEmployee(CreateEmployeeRequest) returns (CreateEmployeeResponse);
+  rpc GetEmployee(GetEmployeeRequest) returns (GetEmployeeResponse);
+  rpc UpdateEmployee(UpdateEmployeeRequest) returns (UpdateEmployeeResponse);
+  rpc DeleteEmployee(DeleteEmployeeRequest) returns (DeleteEmployeeResponse);
+}

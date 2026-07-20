@@ -1,0 +1,125 @@
+<svg viewBox="0 0 1200 780" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#4a5568"/>
+    </marker>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#2b6cb0"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="780" fill="#f7fafc"/>
+
+  <text x="600" y="40" text-anchor="middle" font-size="24" font-weight="700" fill="#1a202c">Employee gRPC Service — Data Flow</text>
+  <text x="600" y="64" text-anchor="middle" font-size="14" fill="#4a5568">Which generated file does what, at each step of a CreateEmployee call</text>
+
+  <!-- CLIENT PROCESS BOX -->
+  <rect x="40" y="100" width="330" height="560" rx="10" fill="#ffffff" stroke="#cbd5e0" stroke-width="2"/>
+  <text x="205" y="128" text-anchor="middle" font-size="16" font-weight="700" fill="#2d3748">CLIENT PROCESS (client.py)</text>
+
+  <!-- client.py box -->
+  <rect x="70" y="150" width="270" height="70" rx="8" fill="#ebf8ff" stroke="#2b6cb0" stroke-width="1.5"/>
+  <text x="205" y="175" text-anchor="middle" font-size="13" font-weight="600" fill="#2c5282">1. client.py</text>
+  <text x="205" y="193" text-anchor="middle" font-size="11" fill="#2c5282">builds CreateEmployeeRequest(name, dept, salary)</text>
+  <text x="205" y="208" text-anchor="middle" font-size="11" fill="#2c5282">calls stub.CreateEmployee(request)</text>
+
+  <line x1="205" y1="220" x2="205" y2="248" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- employee_pb2.py box (client) -->
+  <rect x="70" y="250" width="270" height="65" rx="8" fill="#fefcbf" stroke="#b7791f" stroke-width="1.5"/>
+  <text x="205" y="273" text-anchor="middle" font-size="13" font-weight="600" fill="#744210">2. employee_pb2.py</text>
+  <text x="205" y="291" text-anchor="middle" font-size="11" fill="#744210">defines the Request/Response Python classes</text>
+  <text x="205" y="305" text-anchor="middle" font-size="11" fill="#744210">used to construct the message object</text>
+
+  <line x1="205" y1="315" x2="205" y2="343" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- employee_pb2_grpc.py Stub box -->
+  <rect x="70" y="345" width="270" height="80" rx="8" fill="#e6fffa" stroke="#2c7a7b" stroke-width="1.5"/>
+  <text x="205" y="368" text-anchor="middle" font-size="13" font-weight="600" fill="#234e52">3. employee_pb2_grpc.py</text>
+  <text x="205" y="386" text-anchor="middle" font-size="11" fill="#234e52">EmployeeServiceStub.CreateEmployee</text>
+  <text x="205" y="400" text-anchor="middle" font-size="11" fill="#234e52">serializes request → protobuf bytes</text>
+  <text x="205" y="414" text-anchor="middle" font-size="11" fill="#234e52">sends over the gRPC channel</text>
+
+  <line x1="205" y1="425" x2="205" y2="453" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Channel box -->
+  <rect x="70" y="455" width="270" height="55" rx="8" fill="#f0f0f0" stroke="#718096" stroke-width="1.5"/>
+  <text x="205" y="478" text-anchor="middle" font-size="13" font-weight="600" fill="#2d3748">grpc.insecure_channel</text>
+  <text x="205" y="496" text-anchor="middle" font-size="11" fill="#4a5568">"localhost:50051" — the TCP connection</text>
+
+  <!-- response returning box -->
+  <rect x="70" y="560" width="270" height="80" rx="8" fill="#ebf8ff" stroke="#2b6cb0" stroke-width="1.5"/>
+  <text x="205" y="583" text-anchor="middle" font-size="13" font-weight="600" fill="#2c5282">6. client.py receives response</text>
+  <text x="205" y="601" text-anchor="middle" font-size="11" fill="#2c5282">employee_pb2_grpc.py deserializes bytes</text>
+  <text x="205" y="615" text-anchor="middle" font-size="11" fill="#2c5282">back into an employee_pb2.Employee object</text>
+  <text x="205" y="629" text-anchor="middle" font-size="11" fill="#2c5282">print(response.employee)</text>
+
+  <!-- NETWORK MIDDLE -->
+  <rect x="410" y="330" width="380" height="130" rx="10" fill="#faf5ff" stroke="#6b46c1" stroke-width="2" stroke-dasharray="6,4"/>
+  <text x="600" y="360" text-anchor="middle" font-size="15" font-weight="700" fill="#553c9a">OVER THE WIRE</text>
+  <text x="600" y="385" text-anchor="middle" font-size="12" fill="#553c9a">HTTP/2 connection</text>
+  <text x="600" y="405" text-anchor="middle" font-size="12" fill="#553c9a">binary Protocol Buffers payload</text>
+  <text x="600" y="425" text-anchor="middle" font-size="12" fill="#553c9a">method path: /employee.EmployeeService/CreateEmployee</text>
+  <text x="600" y="445" text-anchor="middle" font-size="11" fill="#805ad5">(not JSON — compact binary encoding)</text>
+
+  <!-- Arrows between client and network -->
+  <line x1="340" y1="380" x2="405" y2="380" stroke="#2b6cb0" stroke-width="2.5" marker-end="url(#arrowBlue)"/>
+  <text x="372" y="372" text-anchor="middle" font-size="10" fill="#2b6cb0">request</text>
+
+  <line x1="405" y1="600" x2="340" y2="600" stroke="#2b6cb0" stroke-width="2.5" marker-end="url(#arrowBlue)"/>
+  <text x="372" y="592" text-anchor="middle" font-size="10" fill="#2b6cb0">response</text>
+
+  <!-- Arrows between network and server -->
+  <line x1="795" y1="380" x2="860" y2="380" stroke="#2b6cb0" stroke-width="2.5" marker-end="url(#arrowBlue)"/>
+  <line x1="860" y1="600" x2="795" y2="600" stroke="#2b6cb0" stroke-width="2.5" marker-end="url(#arrowBlue)"/>
+
+  <!-- SERVER PROCESS BOX -->
+  <rect x="830" y="100" width="330" height="560" rx="10" fill="#ffffff" stroke="#cbd5e0" stroke-width="2"/>
+  <text x="995" y="128" text-anchor="middle" font-size="16" font-weight="700" fill="#2d3748">SERVER PROCESS (server.py)</text>
+
+  <!-- grpc.server box -->
+  <rect x="860" y="150" width="270" height="65" rx="8" fill="#f0f0f0" stroke="#718096" stroke-width="1.5"/>
+  <text x="995" y="173" text-anchor="middle" font-size="13" font-weight="600" fill="#2d3748">4. grpc.server listener</text>
+  <text x="995" y="191" text-anchor="middle" font-size="11" fill="#4a5568">receives bytes on port 50051,</text>
+  <text x="995" y="205" text-anchor="middle" font-size="11" fill="#4a5568">routes by method path</text>
+
+  <line x1="995" y1="215" x2="995" y2="243" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- employee_pb2_grpc.py servicer box -->
+  <rect x="860" y="245" width="270" height="80" rx="8" fill="#e6fffa" stroke="#2c7a7b" stroke-width="1.5"/>
+  <text x="995" y="268" text-anchor="middle" font-size="13" font-weight="600" fill="#234e52">5. employee_pb2_grpc.py</text>
+  <text x="995" y="286" text-anchor="middle" font-size="11" fill="#234e52">add_EmployeeServiceServicer_to_server</text>
+  <text x="995" y="300" text-anchor="middle" font-size="11" fill="#234e52">deserializes bytes using employee_pb2.py,</text>
+  <text x="995" y="314" text-anchor="middle" font-size="11" fill="#234e52">dispatches to our EmployeeServicer</text>
+
+  <line x1="995" y1="325" x2="995" y2="353" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- employee_pb2.py server box -->
+  <rect x="860" y="355" width="270" height="55" rx="8" fill="#fefcbf" stroke="#b7791f" stroke-width="1.5"/>
+  <text x="995" y="378" text-anchor="middle" font-size="13" font-weight="600" fill="#744210">employee_pb2.py</text>
+  <text x="995" y="396" text-anchor="middle" font-size="11" fill="#744210">gives request.name, request.salary etc.</text>
+
+  <line x1="995" y1="410" x2="995" y2="438" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- EmployeeServicer.CreateEmployee box -->
+  <rect x="860" y="440" width="270" height="90" rx="8" fill="#fff5f5" stroke="#c53030" stroke-width="1.5"/>
+  <text x="995" y="463" text-anchor="middle" font-size="13" font-weight="600" fill="#742a2a">server.py — EmployeeServicer</text>
+  <text x="995" y="481" text-anchor="middle" font-size="11" fill="#742a2a">.CreateEmployee(request, context)</text>
+  <text x="995" y="495" text-anchor="middle" font-size="11" fill="#742a2a">assigns next_id, builds Employee(),</text>
+  <text x="995" y="509" text-anchor="middle" font-size="11" fill="#742a2a">stores it, wraps in Response</text>
+
+  <line x1="995" y1="530" x2="995" y2="558" stroke="#4a5568" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- in-memory store box -->
+  <rect x="860" y="560" width="270" height="55" rx="8" fill="#f0fff4" stroke="#2f855a" stroke-width="1.5"/>
+  <text x="995" y="583" text-anchor="middle" font-size="13" font-weight="600" fill="#22543d">self._employees dict</text>
+  <text x="995" y="601" text-anchor="middle" font-size="11" fill="#22543d">the in-memory "database" (protected by a Lock)</text>
+
+  <!-- legend -->
+  <rect x="40" y="690" width="1120" height="70" rx="8" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="60" y="712" font-size="12" font-weight="700" fill="#2d3748">File roles:</text>
+  <rect x="60" y="722" width="14" height="14" fill="#fefcbf" stroke="#b7791f"/>
+  <text x="80" y="733" font-size="11" fill="#4a5568">employee_pb2.py — message classes (Employee, requests, responses) + serialization</text>
+  <rect x="600" y="722" width="14" height="14" fill="#e6fffa" stroke="#2c7a7b"/>
+  <text x="620" y="733" font-size="11" fill="#4a5568">employee_pb2_grpc.py — Stub (client side) + Servicer base class (server side)</text>
+</svg>
