@@ -509,7 +509,7 @@ With reflection in place:
    with all four methods
 4. Pick a method (e.g. `CreateEmployee`), fill in the auto-generated JSON body:
    ```json
-   { "name": "Div Sharma", "department": "DevOps", "salary": 75000 }
+   { "name": " Name", "department": "Engineering", "salary": 75000 }
    ```
 5. **Invoke** — response comes back in the same JSON-like shape, and the row is now persisted in
    Postgres (verifiable in DBeaver).
