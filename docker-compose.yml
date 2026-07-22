@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: employee-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: employee_app
+      POSTGRES_PASSWORD: employee_pass
+      POSTGRES_DB: employee_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - employee_pg_data:/var/lib/postgresql/data
+
+volumes:
+  employee_pg_data:
