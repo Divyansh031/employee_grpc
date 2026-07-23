@@ -1,122 +1,139 @@
+import os
 from concurrent import futures
 
 import grpc
 from grpc_reflection.v1alpha import reflection
 
-
 import employee_pb2
 import employee_pb2_grpc
-from db.database import SessionLocal
-from db.emp_model import EmployeeModel
+from validators import validator
+from repositories.base import EmployeeRecord
 
 
-def to_proto(db_employee: EmployeeModel) -> employee_pb2.Employee:
-    """Translate a DB row (EmployeeModel) into a wire message (employee_pb2.Employee)."""
+def get_repository():
+    """
+    Picks a storage backend based on the DB_BACKEND environment variable.
+    Defaults to postgres if unset. This is the ONLY place that reads the
+    env var - it returns both the repository instance and the backend name,
+    so callers never need to read DB_BACKEND themselves.
+    """
+    backend = os.environ.get("DB_BACKEND", "postgres").lower()
+
+    if backend == "postgres":
+        from repositories.postgres_repository import PostgresEmployeeRepository
+        return PostgresEmployeeRepository(), backend
+    elif backend == "mongo":
+        from repositories.mongo_repository import MongoEmployeeRepository
+        return MongoEmployeeRepository(), backend
+    else:
+        raise ValueError(f"Unknown DB_BACKEND: {backend!r} (expected 'postgres' or 'mongo')")
+
+
+def to_proto(record: EmployeeRecord) -> employee_pb2.Employee:
+    """Translate a repository record (a plain dict) into a wire message."""
     return employee_pb2.Employee(
-        id=db_employee.id,
-        name=db_employee.name,
-        department=db_employee.department,
-        salary=float(db_employee.salary),  # Numeric column comes back as Decimal
+        id=record["id"],
+        name=record["name"],
+        department=record["department"],
+        salary=record["salary"],
     )
 
 
 class EmployeeServicer(employee_pb2_grpc.EmployeeServiceServicer):
     """
-    Same interface as before (CreateEmployee, GetEmployee, UpdateEmployee,
-    DeleteEmployee), but now backed by Postgres instead of a dict.
-
-    No more threading.Lock() here - the database itself handles concurrent
-    access safely (that's literally one of the jobs a DB is built for).
-    We DO still need a fresh Session per request though - Sessions aren't
-    thread-safe to share across concurrent requests, so each method opens
-    its own and closes it when done.
+    This class no longer knows or cares whether it's talking to Postgres or
+    MongoDB - it only calls methods on self.repository, which follows the
+    EmployeeRepository interface. Swapping backends is a config change
+    (DB_BACKEND env var), not a code change here.
     """
 
-    def CreateEmployee(self, request, context):
-        session = SessionLocal()
-        try:
-            db_employee = EmployeeModel(
-                name=request.name,
-                department=request.department,
-                salary=request.salary,
-            )
-            session.add(db_employee)
-            session.commit()       # writes the INSERT, assigns the auto id
-            session.refresh(db_employee)  # pulls the generated id back into the object
+    def __init__(self, repository):
+        self.repository = repository
 
-            print(f"[CreateEmployee] created id={db_employee.id} name={request.name!r}")
-            return employee_pb2.CreateEmployeeResponse(employee=to_proto(db_employee))
-        finally:
-            session.close()
+    def CreateEmployee(self, request, context):
+        errors = validator.validate_create_request(request)
+        if errors:
+            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+            context.set_details("; ".join(errors))
+            return employee_pb2.CreateEmployeeResponse()
+
+        record = self.repository.create(
+            name=request.name, department=request.department, salary=request.salary
+        )
+        print(f"[CreateEmployee] created id={record['id']} name={request.name!r}")
+        return employee_pb2.CreateEmployeeResponse(employee=to_proto(record))
 
     def GetEmployee(self, request, context):
-        session = SessionLocal()
-        try:
-            db_employee = session.get(EmployeeModel, request.id)
-            if db_employee is None:
-                context.set_code(grpc.StatusCode.NOT_FOUND)
-                context.set_details(f"Employee with id {request.id} not found")
-                return employee_pb2.GetEmployeeResponse()
+        errors = validator.validate_id_only_request(request)
+        if errors:
+            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+            context.set_details("; ".join(errors))
+            return employee_pb2.GetEmployeeResponse()
 
-            return employee_pb2.GetEmployeeResponse(employee=to_proto(db_employee))
-        finally:
-            session.close()
+        record = self.repository.get(request.id)
+        if record is None:
+            context.set_code(grpc.StatusCode.NOT_FOUND)
+            context.set_details(f"Employee with id {request.id} not found")
+            return employee_pb2.GetEmployeeResponse()
+
+        return employee_pb2.GetEmployeeResponse(employee=to_proto(record))
 
     def UpdateEmployee(self, request, context):
-        session = SessionLocal()
-        try:
-            db_employee = session.get(EmployeeModel, request.id)
-            if db_employee is None:
-                context.set_code(grpc.StatusCode.NOT_FOUND)
-                context.set_details(f"Employee with id {request.id} not found")
-                return employee_pb2.UpdateEmployeeResponse()
+        errors = validator.validate_update_request(request)
+        if errors:
+            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+            context.set_details("; ".join(errors))
+            return employee_pb2.UpdateEmployeeResponse()
 
-            db_employee.name = request.name
-            db_employee.department = request.department
-            db_employee.salary = request.salary
-            session.commit()
-            session.refresh(db_employee)
+        record = self.repository.update(
+            employee_id=request.id,
+            name=request.name,
+            department=request.department,
+            salary=request.salary,
+        )
+        if record is None:
+            context.set_code(grpc.StatusCode.NOT_FOUND)
+            context.set_details(f"Employee with id {request.id} not found")
+            return employee_pb2.UpdateEmployeeResponse()
 
-            print(f"[UpdateEmployee] updated id={request.id}")
-            return employee_pb2.UpdateEmployeeResponse(employee=to_proto(db_employee))
-        finally:
-            session.close()
+        print(f"[UpdateEmployee] updated id={request.id}")
+        return employee_pb2.UpdateEmployeeResponse(employee=to_proto(record))
 
     def DeleteEmployee(self, request, context):
-        session = SessionLocal()
-        try:
-            db_employee = session.get(EmployeeModel, request.id)
-            if db_employee is None:
-                context.set_code(grpc.StatusCode.NOT_FOUND)
-                context.set_details(f"Employee with id {request.id} not found")
-                return employee_pb2.DeleteEmployeeResponse(success=False)
+        errors = validator.validate_id_only_request(request)
+        if errors:
+            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+            context.set_details("; ".join(errors))
+            return employee_pb2.DeleteEmployeeResponse(success=False)
 
-            session.delete(db_employee)
-            session.commit()
+        deleted = self.repository.delete(request.id)
+        if not deleted:
+            context.set_code(grpc.StatusCode.NOT_FOUND)
+            context.set_details(f"Employee with id {request.id} not found")
+            return employee_pb2.DeleteEmployeeResponse(success=False)
 
-            print(f"[DeleteEmployee] deleted id={request.id}")
-            return employee_pb2.DeleteEmployeeResponse(success=True)
-        finally:
-            session.close()
+        print(f"[DeleteEmployee] deleted id={request.id}")
+        return employee_pb2.DeleteEmployeeResponse(success=True)
 
 
 def serve():
+    repository, backend_name = get_repository()
+
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    employee_pb2_grpc.add_EmployeeServiceServicer_to_server(EmployeeServicer(), server)
- 
-    # Enable server reflection: advertise our EmployeeService (plus the
-    # reflection service itself) so tools like Postman/grpcurl can discover
-    # methods and message shapes without needing the .proto file directly.
+    employee_pb2_grpc.add_EmployeeServiceServicer_to_server(
+        EmployeeServicer(repository), server
+    )
+
     service_names = (
         employee_pb2.DESCRIPTOR.services_by_name["EmployeeService"].full_name,
         reflection.SERVICE_NAME,
     )
     reflection.enable_server_reflection(service_names, server)
- 
+
     port = "50051"
     server.add_insecure_port(f"[::]:{port}")
     server.start()
-    print(f"Employee gRPC server (Postgres-backed) running on port {port}...")
+    print(f"Employee gRPC server ({backend_name}-backed) running on port {port}...")
     server.wait_for_termination()
 
 

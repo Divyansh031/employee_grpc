@@ -12,5 +12,28 @@ services:
     volumes:
       - employee_pg_data:/var/lib/postgresql/data
 
+  mongo:
+    image: mongo:7
+    container_name: employee-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - employee_mongo_data:/data/db
+
+  mongo-express:
+    image: mongo-express:1
+    container_name: employee-mongo-express
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_BASICAUTH: "false"
+    ports:
+      - "8081:8081"    
+ 
 volumes:
   employee_pg_data:
+  employee_mongo_data:
