@@ -35,16 +35,25 @@ class PostgresEmployeeRepository(EmployeeRepository):
             session.close()
 
     def update(
-        self, employee_id: int, name: str, department: str, salary: float
+        self,
+        employee_id: int,
+        name: Optional[str] = None,
+        department: Optional[str] = None,
+        salary: Optional[float] = None,
     ) -> Optional[EmployeeRecord]:
         session = SessionLocal()
         try:
             db_employee = session.get(EmployeeModel, employee_id)
             if db_employee is None:
                 return None
-            db_employee.name = name
-            db_employee.department = department
-            db_employee.salary = salary
+            # Only touch attributes that were actually passed - None means
+            # "client didn't send this field, leave it as-is".
+            if name is not None:
+                db_employee.name = name
+            if department is not None:
+                db_employee.department = department
+            if salary is not None:
+                db_employee.salary = salary
             session.commit()
             session.refresh(db_employee)
             return _to_record(db_employee)

@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0e\x65mployee.proto\x12\x08\x65mployee\"H\n\x08\x45mployee\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x12\n\ndepartment\x18\x03 \x01(\t\x12\x0e\n\x06salary\x18\x04 \x01(\x01\"I\n\x15\x43reateEmployeeRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x12\n\ndepartment\x18\x02 \x01(\t\x12\x0e\n\x06salary\x18\x03 \x01(\x01\">\n\x16\x43reateEmployeeResponse\x12$\n\x08\x65mployee\x18\x01 \x01(\x0b\x32\x12.employee.Employee\" \n\x12GetEmployeeRequest\x12\n\n\x02id\x18\x01 \x01(\x05\";\n\x13GetEmployeeResponse\x12$\n\x08\x65mployee\x18\x01 \x01(\x0b\x32\x12.employee.Employee\"U\n\x15UpdateEmployeeRequest\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x12\n\ndepartment\x18\x03 \x01(\t\x12\x0e\n\x06salary\x18\x04 \x01(\x01\">\n\x16UpdateEmployeeResponse\x12$\n\x08\x65mployee\x18\x01 \x01(\x0b\x32\x12.employee.Employee\"#\n\x15\x44\x65leteEmployeeRequest\x12\n\n\x02id\x18\x01 \x01(\x05\")\n\x16\x44\x65leteEmployeeResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x32\xdc\x02\n\x0f\x45mployeeService\x12S\n\x0e\x43reateEmployee\x12\x1f.employee.CreateEmployeeRequest\x1a .employee.CreateEmployeeResponse\x12J\n\x0bGetEmployee\x12\x1c.employee.GetEmployeeRequest\x1a\x1d.employee.GetEmployeeResponse\x12S\n\x0eUpdateEmployee\x12\x1f.employee.UpdateEmployeeRequest\x1a .employee.UpdateEmployeeResponse\x12S\n\x0e\x44\x65leteEmployee\x12\x1f.employee.DeleteEmployeeRequest\x1a .employee.DeleteEmployeeResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0e\x65mployee.proto\x12\x08\x65mployee\"H\n\x08\x45mployee\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x12\n\ndepartment\x18\x03 \x01(\t\x12\x0e\n\x06salary\x18\x04 \x01(\x01\"I\n\x15\x43reateEmployeeRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x12\n\ndepartment\x18\x02 \x01(\t\x12\x0e\n\x06salary\x18\x03 \x01(\x01\">\n\x16\x43reateEmployeeResponse\x12$\n\x08\x65mployee\x18\x01 \x01(\x0b\x32\x12.employee.Employee\" \n\x12GetEmployeeRequest\x12\n\n\x02id\x18\x01 \x01(\x05\";\n\x13GetEmployeeResponse\x12$\n\x08\x65mployee\x18\x01 \x01(\x0b\x32\x12.employee.Employee\"\x87\x01\n\x15UpdateEmployeeRequest\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x11\n\x04name\x18\x02 \x01(\tH\x00\x88\x01\x01\x12\x17\n\ndepartment\x18\x03 \x01(\tH\x01\x88\x01\x01\x12\x13\n\x06salary\x18\x04 \x01(\x01H\x02\x88\x01\x01\x42\x07\n\x05_nameB\r\n\x0b_departmentB\t\n\x07_salary\">\n\x16UpdateEmployeeResponse\x12$\n\x08\x65mployee\x18\x01 \x01(\x0b\x32\x12.employee.Employee\"#\n\x15\x44\x65leteEmployeeRequest\x12\n\n\x02id\x18\x01 \x01(\x05\")\n\x16\x44\x65leteEmployeeResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x32\xdc\x02\n\x0f\x45mployeeService\x12S\n\x0e\x43reateEmployee\x12\x1f.employee.CreateEmployeeRequest\x1a .employee.CreateEmployeeResponse\x12J\n\x0bGetEmployee\x12\x1c.employee.GetEmployeeRequest\x1a\x1d.employee.GetEmployeeResponse\x12S\n\x0eUpdateEmployee\x12\x1f.employee.UpdateEmployeeRequest\x1a .employee.UpdateEmployeeResponse\x12S\n\x0e\x44\x65leteEmployee\x12\x1f.employee.DeleteEmployeeRequest\x1a .employee.DeleteEmployeeResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -41,14 +41,14 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_GETEMPLOYEEREQUEST']._serialized_end=273
   _globals['_GETEMPLOYEERESPONSE']._serialized_start=275
   _globals['_GETEMPLOYEERESPONSE']._serialized_end=334
-  _globals['_UPDATEEMPLOYEEREQUEST']._serialized_start=336
-  _globals['_UPDATEEMPLOYEEREQUEST']._serialized_end=421
-  _globals['_UPDATEEMPLOYEERESPONSE']._serialized_start=423
-  _globals['_UPDATEEMPLOYEERESPONSE']._serialized_end=485
-  _globals['_DELETEEMPLOYEEREQUEST']._serialized_start=487
-  _globals['_DELETEEMPLOYEEREQUEST']._serialized_end=522
-  _globals['_DELETEEMPLOYEERESPONSE']._serialized_start=524
-  _globals['_DELETEEMPLOYEERESPONSE']._serialized_end=565
-  _globals['_EMPLOYEESERVICE']._serialized_start=568
-  _globals['_EMPLOYEESERVICE']._serialized_end=916
+  _globals['_UPDATEEMPLOYEEREQUEST']._serialized_start=337
+  _globals['_UPDATEEMPLOYEEREQUEST']._serialized_end=472
+  _globals['_UPDATEEMPLOYEERESPONSE']._serialized_start=474
+  _globals['_UPDATEEMPLOYEERESPONSE']._serialized_end=536
+  _globals['_DELETEEMPLOYEEREQUEST']._serialized_start=538
+  _globals['_DELETEEMPLOYEEREQUEST']._serialized_end=573
+  _globals['_DELETEEMPLOYEERESPONSE']._serialized_start=575
+  _globals['_DELETEEMPLOYEERESPONSE']._serialized_end=616
+  _globals['_EMPLOYEESERVICE']._serialized_start=619
+  _globals['_EMPLOYEESERVICE']._serialized_end=967
 # @@protoc_insertion_point(module_scope)

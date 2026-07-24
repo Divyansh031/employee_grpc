@@ -53,12 +53,20 @@ def validate_create_request(request) -> list[str]:
 
 
 def validate_update_request(request) -> list[str]:
-    return (
-        validate_id(request.id)
-        + validate_name(request.name)
-        + validate_department(request.department)
-        + validate_salary(request.salary)
-    )
+    """
+    Partial update: only fields the client actually sent get validated.
+    request.HasField(...) works here because 'name', 'department', and
+    'salary' are declared 'optional' in the .proto - that's what gives
+    them real presence-tracking, distinct from their zero values.
+    """
+    errors = validate_id(request.id)
+    if request.HasField("name"):
+        errors += validate_name(request.name)
+    if request.HasField("department"):
+        errors += validate_department(request.department)
+    if request.HasField("salary"):
+        errors += validate_salary(request.salary)
+    return errors
 
 
 def validate_id_only_request(request) -> list[str]:

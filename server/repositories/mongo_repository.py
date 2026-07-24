@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pymongo import MongoClient, ReturnDocument
+from pymongo import MongoClient, ReturnDocument # type: ignore
 
 from repositories.base import EmployeeRepository, EmployeeRecord
 
@@ -59,11 +59,32 @@ class MongoEmployeeRepository(EmployeeRepository):
         return self._to_record(doc) if doc else None
 
     def update(
-        self, employee_id: int, name: str, department: str, salary: float
+        self,
+        employee_id: int,
+        name: Optional[str] = None,
+        department: Optional[str] = None,
+        salary: Optional[float] = None,
     ) -> Optional[EmployeeRecord]:
+        # Build $set with only the fields that were actually passed - a key
+        # simply absent from $set is left completely untouched by MongoDB,
+        # which is exactly the "don't change what wasn't sent" behavior.
+        fields_to_set = {}
+        if name is not None:
+            fields_to_set["name"] = name
+        if department is not None:
+            fields_to_set["department"] = department
+        if salary is not None:
+            fields_to_set["salary"] = salary
+ 
+        if not fields_to_set:
+            # Nothing to change - just return the current document as-is,
+            # but still confirm it exists (None if it doesn't).
+            doc = self._employees.find_one({"_id": employee_id})
+            return self._to_record(doc) if doc else None
+ 
         doc = self._employees.find_one_and_update(
             {"_id": employee_id},
-            {"$set": {"name": name, "department": department, "salary": salary}},
+            {"$set": fields_to_set},
             return_document=ReturnDocument.AFTER,
         )
         return self._to_record(doc) if doc else None

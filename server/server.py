@@ -84,19 +84,26 @@ class EmployeeServicer(employee_pb2_grpc.EmployeeServiceServicer):
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
             context.set_details("; ".join(errors))
             return employee_pb2.UpdateEmployeeResponse()
-
-        record = self.repository.update(
-            employee_id=request.id,
-            name=request.name,
-            department=request.department,
-            salary=request.salary,
-        )
+ 
+        # Only pass fields the client actually set - HasField distinguishes
+        # "not sent" from "sent as empty/zero" for these optional fields.
+        # A field simply absent from kwargs means "leave it unchanged" to
+        # the repository layer (its default is None, meaning don't touch it).
+        update_kwargs = {}
+        if request.HasField("name"):
+            update_kwargs["name"] = request.name
+        if request.HasField("department"):
+            update_kwargs["department"] = request.department
+        if request.HasField("salary"):
+            update_kwargs["salary"] = request.salary
+ 
+        record = self.repository.update(employee_id=request.id, **update_kwargs)
         if record is None:
             context.set_code(grpc.StatusCode.NOT_FOUND)
             context.set_details(f"Employee with id {request.id} not found")
             return employee_pb2.UpdateEmployeeResponse()
-
-        print(f"[UpdateEmployee] updated id={request.id}")
+ 
+        print(f"[UpdateEmployee] updated id={request.id} fields={list(update_kwargs.keys())}")
         return employee_pb2.UpdateEmployeeResponse(employee=to_proto(record))
 
     def DeleteEmployee(self, request, context):

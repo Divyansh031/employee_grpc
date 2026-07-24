@@ -32,9 +32,17 @@ class EmployeeRepository(ABC):
 
     @abstractmethod
     def update(
-        self, employee_id: int, name: str, department: str, salary: float
+        self,
+        employee_id: int,
+        name: Optional[str] = None,
+        department: Optional[str] = None,
+        salary: Optional[float] = None,
     ) -> Optional[EmployeeRecord]:
-        """Returns None if no employee with this id exists."""
+        """
+        Partial update - only fields passed as non-None get changed.
+        Fields left as None keep their existing stored value.
+        Returns None if no employee with this id exists.
+        """   
         ...
 
     @abstractmethod

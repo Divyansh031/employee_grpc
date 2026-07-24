@@ -33,10 +33,10 @@ message GetEmployeeResponse {
 
 // --- Update ---
 message UpdateEmployeeRequest {
-  int32 id = 1;
-  string name = 2;
-  string department = 3;
-  double salary = 4;
+  int32 id = 1;                    // required - which employee to update
+  optional string name = 2;        // only update if provided
+  optional string department = 3;  // only update if provided
+  optional double salary = 4;      // only update if provided
 }
 
 message UpdateEmployeeResponse {
